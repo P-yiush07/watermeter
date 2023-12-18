@@ -32,6 +32,7 @@ const Sidebar = () => {
           Logout
         </button>
       </div>
+        <span className='p-4 mt-1'>Profile Completed</span>
     </div>
   );
 };
