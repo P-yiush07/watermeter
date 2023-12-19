@@ -14,12 +14,20 @@ const MyProfileComponent = () => {
     weight: '',
   });
 
+  const [isEditing, setIsEditing] = useState({
+    name: false,
+    age: false,
+    gender: false,
+    height: false,
+    weight: false,
+  });
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   useEffect(() => {
@@ -33,16 +41,23 @@ const MyProfileComponent = () => {
   }, []);
 
 
-  const saveProfile = async (e) => {
+  const saveProfile = async (e, field) => {
     e.preventDefault();
     try {
-      await account.updatePrefs(formData);
-      setProfileData(formData);
-      localStorage.setItem('profileData', JSON.stringify(formData));
+      await account.updatePrefs({ [field]: formData[field] });
+      setProfileData({ ...profileData, [field]: formData[field] });
+      localStorage.setItem('profileData', JSON.stringify({ ...profileData, [field]: formData[field] }));
+      setIsEditing({ ...isEditing, [field]: false });
     } catch (error) {
       console.error('Error updating profile:', error);
     }
   };
+
+  const handleEditClick = (field) => {
+    setIsEditing({ ...isEditing, [field]: true });
+    setFormData({ ...formData, [field]: profileData[field] });
+  };
+
 
   if (loading) {
     return <p>Loading...</p>;
@@ -143,11 +158,50 @@ const MyProfileComponent = () => {
 
   return (
     <div className="flex justify-center items-center h-screen">
-       <div className="bg-white p-8 rounded-md shadow-md w-[44rem]">
-          <h2 className="text-2xl font-semibold mb-5">Profile Name: {profileData.name}</h2>
-          {/* Other profile details here if needed */}
-        </div>
+      <div className="bg-white p-8 rounded-md shadow-md w-[44rem]">
+        {Object.keys(profileData).map((field) => (
+          <div key={field}>
+            {isEditing[field] ? (
+              <form onSubmit={(e) => saveProfile(e, field)}>
+                <div className="mb-5 flex items-center">
+                  <label htmlFor={field} className="block text-gray-700 font-semibold mb-2">
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                  </label>
+                  <input
+                    type="text"
+                    id={field}
+                    name={field}
+                    value={formData[field]}
+                    onChange={handleInputChange}
+                    placeholder={`Enter your ${field}`}
+                    className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800 ml-2"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                >
+                  Save
+                </button>
+              </form>
+            ) : (
+              <>
+                <h2 className="text-2xl font-semibold mb-5">
+                  {field.charAt(0).toUpperCase() + field.slice(1)}: {profileData[field]}
+                </h2>
+                <button
+                  onClick={() => handleEditClick(field)}
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                >
+                  Update {field.charAt(0).toUpperCase() + field.slice(1)}
+                </button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
+
 export default MyProfileComponent;
