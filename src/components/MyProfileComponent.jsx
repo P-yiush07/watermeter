@@ -1,105 +1,58 @@
 import { useEffect, useState } from 'react';
-import { databases } from './appwrite/appwriteconfig';
-import { ID } from "appwrite";
+import { account } from './appwrite/appwriteconfig';
+
 
 const MyProfileComponent = () => {
 
-  const [name, setName] = useState('');
-  const [age, setAge] = useState('');
-  const [selectedGender, setSelectedGender] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
-  const [profileStatus, setProfileStatus] = useState(false)
-  const [retrievedData, setRetrievedData] = useState(null);
-  const [documentId, setDocumentId] = useState(null);
+  const [profileData, setProfileData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    name: '',
+    age: '',
+    gender: '',
+    height: '',
+    weight: '',
+  });
 
-  const handleGenderChange = (e) => {
-    setSelectedGender(e.target.value);
-  };
 
-  const handleAgeChange = (e) => {
-    setAge(e.target.value);
-  };
-
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-
-  const handleHeightChange = (e) => {
-    setHeight(e.target.value);
-  };
-
-  const handleWeightChange = (e) => {
-    setWeight(e.target.value);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const data = {
-      name: name,
-      age: age,
-      gender: selectedGender,
-      height: height,
-      weight: weight,
-      profilecomplete: true,
-    };
-
-    try {
-      const response = await databases.createDocument(
-        '657ee0306afa5a50bd2a',
-        '657ee04b620145823fe1',
-        ID.unique(),
-        data
-      );
-
-      setDocumentId(response.$id);
-
-      // Update profileStatus state to true
-
-      setProfileStatus(true);
-
-      console.log('Document created:', response);
-    } catch (error) {
-      console.error('Error creating document:', error);
-    }
-
-    e.target.reset();
-  };
-
-  // console.log('Profile status after setting to true:', profileStatus);
-
-  const fetchDocumentData = async () => {
-    try {
-      const response = await databases.getDocument('657ee0306afa5a50bd2a', '657ee04b620145823fe1', documentId);
-      setRetrievedData(response); // Set the retrieved data to state
-    } catch (error) {
-      console.error('Error fetching document:', error);
-    }
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   useEffect(() => {
-    if (profileStatus && documentId) {
-      fetchDocumentData(); // Fetch data using the stored document ID
-      console.log(documentId);
+    const storedData = localStorage.getItem('profileData');
+    if (storedData) {
+      setProfileData(JSON.parse(storedData));
+      setLoading(false);
+    } else {
+      setLoading(false); // Set loading to false for new users
     }
-  }, [profileStatus, documentId]);
+  }, []);
 
-  // if (retrievedData) {
-  //   console.log('Retrieved data:', retrievedData.name); // Log retrieved data when it's available
-  // }
 
-  return (
-    <div className="flex justify-center items-center h-screen">
-      {profileStatus ? (
-        // Show the profile name div when profileStatus is true
+  const saveProfile = async (e) => {
+    e.preventDefault();
+    try {
+      await account.updatePrefs(formData);
+      setProfileData(formData);
+      localStorage.setItem('profileData', JSON.stringify(formData));
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+   if (!Object.keys(profileData).length) {
+    return (
+      <div className="flex justify-center items-center h-screen">
         <div className="bg-white p-8 rounded-md shadow-md w-[44rem]">
-          <h2 className="text-2xl font-semibold mb-5">Profile Name: {name}</h2>
-          {/* Other profile details here if needed */}
-        </div>
-      ) : (
-        <div className="bg-white p-8 rounded-md shadow-md w-[44rem]">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={saveProfile}>
             <div className="mb-5 flex items-center">
               <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">
                 Name
@@ -108,8 +61,8 @@ const MyProfileComponent = () => {
                 type="text"
                 id="name"
                 name="name"
-                value={name}
-                onChange={handleNameChange}
+                value={formData.name}
+                onChange={handleInputChange}
                 placeholder="Enter your name"
                 className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800 ml-2"
               />
@@ -122,8 +75,8 @@ const MyProfileComponent = () => {
                 type="text"
                 id="age"
                 name="age"
-                value={age}
-                onChange={handleAgeChange}
+                value={formData.age}
+                onChange={handleInputChange}
                 placeholder="Enter your age"
                 className="border border-gray-300 rounded-md w-16 py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800 ml-2"
               />
@@ -134,8 +87,8 @@ const MyProfileComponent = () => {
                 <select
                   id="gender"
                   name="gender"
-                  value={selectedGender}
-                  onChange={handleGenderChange}
+                  value={formData.gender}
+                  onChange={handleInputChange}
                   className="-mt-7 block w-full border border-gray-300 rounded-md py-2 px-3 ml-20 focus:outline-none focus:border-blue-500"
                 >
                   <option value="">Select</option>
@@ -155,8 +108,8 @@ const MyProfileComponent = () => {
                   type="text"
                   id="height"
                   name="height"
-                  value={height}
-                  onChange={handleHeightChange}
+                  value={formData.height}
+                  onChange={handleInputChange}
                   placeholder="Enter your height"
                   className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800"
                 />
@@ -169,8 +122,8 @@ const MyProfileComponent = () => {
                   type="text"
                   id="weight"
                   name="weight"
-                  value={weight}
-                  onChange={handleWeightChange}
+                  value={formData.weight}
+                  onChange={handleInputChange}
                   placeholder="Enter your weight"
                   className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800"
                 />
@@ -184,7 +137,16 @@ const MyProfileComponent = () => {
             </div>
           </form>
         </div>
-      )}
+      </div>
+    )
+   }
+
+  return (
+    <div className="flex justify-center items-center h-screen">
+       <div className="bg-white p-8 rounded-md shadow-md w-[44rem]">
+          <h2 className="text-2xl font-semibold mb-5">Profile Name: {profileData.name}</h2>
+          {/* Other profile details here if needed */}
+        </div>
     </div>
   );
 };

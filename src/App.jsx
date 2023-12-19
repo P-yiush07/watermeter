@@ -10,6 +10,7 @@ import { AuthProvider } from './components/appwrite/utils/AuthContext';
 import Signup from './components/Signup';
 import Login from './components/Login';
 import Home from './components/Home';
+import ProfilePage from './components/ProfilePage';
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
               <Route path="/take-test" element={<TakeTestComponent />} />
               <Route path="/my-statistics" element={<MyStatisticsComponent />} />
               <Route path="/my-profile" element={<MyProfileComponent />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Route>
 
           </Routes>
