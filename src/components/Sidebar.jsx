@@ -1,12 +1,19 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './appwrite/utils/AuthContext';
 
 const Sidebar = () => {
+  const { logout } = useAuth()
 
-  
+  const navigate = useNavigate();
 
-  const { logoutUser } = useAuth()
-
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate("/login")
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 
   return (
     <div className="bg-blue-500 text-white w-64">
@@ -27,7 +34,7 @@ const Sidebar = () => {
       <div className="mt-auto p-4">
         <button
           className="bg-white text-blue-500 font-bold rounded-full py-2 px-4 w-full focus:outline-none hover:bg-blue-100"
-          onClick={logoutUser}
+          onClick={handleLogout}
         >
           Logout
         </button>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './appwrite/utils/AuthContext';
 
@@ -8,16 +8,11 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  const {user, registerUser} = useAuth()
+  
   const navigate = useNavigate()
+  const {createUser} = useAuth();
 
-  useEffect(() => {
-    if(user) {
-     navigate('/')
-    }
- }, [])
-
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     
     if (password !== confirmPassword){
@@ -25,9 +20,13 @@ const Signup = () => {
       return
     }
 
-    const userInfo = { name, email, password, confirmPassword }
-    registerUser(userInfo)
-  };
+    try {
+      await createUser(email, password)
+      navigate("/login")
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-200 mt-[-2rem]">

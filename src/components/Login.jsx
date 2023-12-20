@@ -1,27 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './appwrite/utils/AuthContext';
 
+
 const Login = () => {
-    const navigate = useNavigate()
-    const {user, loginUser} = useAuth()
-
-
-    useEffect(() => {
-       if(user) {
-        navigate('/take-test')
-       }
-    }, [])
-    
+  const navigate = useNavigate()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-    const handleLogin = (e) => {
-        e.preventDefault();
+  const { login } = useAuth()
 
-        const userInfo = { email, password }
-        loginUser(userInfo)
-        
+    const handleLogin = async(e) => {
+        e.preventDefault();
+        try {
+            await login(email, password);
+            navigate("/take-test");
+        } catch (error) {
+            console.log(error.message);
+        }
     };
 
   return (

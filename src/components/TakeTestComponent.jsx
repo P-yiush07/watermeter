@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+import { useAuth } from './appwrite/utils/AuthContext';
 const TakeTestComponent = () => {
   const [selectedGender, setSelectedGender] = useState('');
   const [age, setAge] = useState('');
@@ -8,6 +8,7 @@ const TakeTestComponent = () => {
   const [weight, setWeight] = useState('');
   const [dailyWaterIntakeMin, setDailyWaterIntakeMin] = useState('');
   const [dailyWaterIntakeMax, setDailyWaterIntakeMax] = useState('');
+
 
   const handleGenderChange = (e) => {
     setSelectedGender(e.target.value);
@@ -50,9 +51,11 @@ const TakeTestComponent = () => {
     setDailyWaterIntakeMax(maxIntake.toFixed(1));
   };
 
+  const { user } = useAuth()
+
   return (
     <div className="py-8 px-4">
-      <h2 className="text-2xl font-bold mb-4">Take Test Component</h2>
+      <h2 className="text-2xl font-bold mb-4">Take Test Component : {user.email}</h2>
       <div className="flex items-start">
         <div className="w-48">
           <label htmlFor="gender" className="block text-sm font-medium text-gray-700">

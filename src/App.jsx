@@ -5,12 +5,12 @@ import Layout from './layout';
 import TakeTestComponent from './components/TakeTestComponent';
 import MyStatisticsComponent from './components/MyStatisticsComponent';
 import MyProfileComponent from './components/MyProfileComponent';
-import PrivateRoutes from './components/appwrite/utils/PrivateRoutes';
 import { AuthProvider } from './components/appwrite/utils/AuthContext';
 import Signup from './components/Signup';
 import Login from './components/Login';
 import Home from './components/Home';
-import ProfilePage from './components/ProfilePage';
+import ProtectedRoute from './components/appwrite/utils/ProtectedRoute';
+// import ProfilePage from './components/ProfilePage';
 
 const App = () => {
   return (
@@ -22,12 +22,9 @@ const App = () => {
             <Route path="/signup" element={<Signup />} /> {/* Route for Signup */}
             <Route path="/" element={<Home />} />
 
-            <Route element={<PrivateRoutes />}>
-              <Route path="/take-test" element={<TakeTestComponent />} />
-              <Route path="/my-statistics" element={<MyStatisticsComponent />} />
-              <Route path="/my-profile" element={<MyProfileComponent />} />
-              <Route path="/profile" element={<ProfilePage />} />
-            </Route>
+              <Route path="/take-test" element={<ProtectedRoute><TakeTestComponent /></ProtectedRoute>} />
+              <Route path="/my-statistics" element={<ProtectedRoute><MyStatisticsComponent /></ProtectedRoute>} />
+              <Route path="/my-profile" element={<ProtectedRoute><MyProfileComponent /></ProtectedRoute>} />
 
           </Routes>
         </Layout>
