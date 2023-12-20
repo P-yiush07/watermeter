@@ -10,7 +10,7 @@ const Signup = () => {
   
   
   const navigate = useNavigate()
-  const {createUser} = useAuth();
+  const {createUser, logout} = useAuth();
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -22,6 +22,7 @@ const Signup = () => {
 
     try {
       await createUser(email, password)
+      await logout()
       navigate("/login")
     } catch (error) {
       console.log(error.message);
