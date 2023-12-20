@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from './appwrite/utils/AuthContext';
 
 const Navbar = () => {
   const navLinkStyle = {
@@ -10,6 +11,7 @@ const Navbar = () => {
     display: 'inline-block',
   };
 
+  const {isLoggedIn} = useAuth();
   return (
     <nav className="bg-blue-500 text-white py-4 flex justify-between items-center">
       <div className="ml-4">
@@ -111,10 +113,17 @@ const Navbar = () => {
         {/* Other list items follow the same pattern */}
         {/* ... */}
       </ul>
-      <div className="mr-6">
+      {isLoggedIn ? (
+        <div className="mr-6">
+        <Link to="/" className="bg-white font-bold text-blue-500 py-2 px-4 rounded-full hover:bg-blue-100 transition-colors duration-300 flex items-center">
+          <span className="mx-auto">Logout</span>
+        </Link>
+        </div>  ) : (
+        <div className="mr-6">
         <Link to="/login" className="bg-white font-bold text-blue-500 py-2 px-4 rounded-full hover:bg-blue-100 transition-colors duration-300 flex items-center">
           <span className="mx-auto">Login</span>
-        </Link></div>
+        </Link>
+      </div> )}
     </nav>
   );
 };

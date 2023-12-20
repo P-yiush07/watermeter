@@ -24,11 +24,13 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-    const logout = () => {
+    const logout = async () => {
         try {
-            signOut(auth)
+            await signOut(auth)
+            setUser(null)
             setisLoggedIn(false);
             console.log("logged out");
+            console.log(isLoggedIn);
         } catch (error) {
             console.log(error.message);
         }
@@ -47,7 +49,11 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         setUser(currentUser)
+        if(currentUser){
         setisLoggedIn(true);
+        } else{
+            setisLoggedIn(false);
+        }
      })
      return () => {
         unsubscribe();
