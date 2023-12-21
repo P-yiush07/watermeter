@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './appwrite/utils/AuthContext';
 
 const Navbar = () => {
@@ -11,7 +11,15 @@ const Navbar = () => {
     display: 'inline-block',
   };
 
-  const {isLoggedIn} = useAuth();
+  const {isLoggedIn, logout} = useAuth();
+  const navigate = useNavigate();
+
+  const handleNavbarSignOut = async() => {
+    await logout()
+    navigate("/")
+    console.log("Sign Out Clicked");
+  }
+  
   return (
     <nav className="bg-blue-500 text-white py-4 flex justify-between items-center">
       <div className="ml-4">
@@ -115,12 +123,12 @@ const Navbar = () => {
       </ul>
       {isLoggedIn ? (
         <div className="mr-6">
-        <Link to="/" className="bg-white font-bold text-blue-500 py-2 px-4 rounded-full hover:bg-blue-100 transition-colors duration-300 flex items-center">
+        <button onClick={handleNavbarSignOut} className="bg-white font-bold text-blue-500 py-2 px-4 rounded-full hover:bg-blue-100 transition-colors duration-300 flex items-center">
           <span className="mx-auto">Logout</span>
-        </Link>
+        </button>
         </div>  ) : (
         <div className="mr-6">
-        <Link to="/login" className="bg-white font-bold text-blue-500 py-2 px-4 rounded-full hover:bg-blue-100 transition-colors duration-300 flex items-center">
+       <Link to="/login" className="bg-white font-bold text-blue-500 py-2 px-4 rounded-full hover:bg-blue-100 transition-colors duration-300 flex items-center">
           <span className="mx-auto">Login</span>
         </Link>
       </div> )}
