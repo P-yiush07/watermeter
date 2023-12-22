@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './appwrite/utils/AuthContext';
-import { doc, serverTimestamp, setDoc, collection, getDocs } from "firebase/firestore";
+import { getDoc, doc } from "firebase/firestore";
 import { db } from './appwrite/firebase';
+import { useCrud } from './appwrite/utils/CdContext';
 
 const MyProfileComponent = () => {
-  const { user } = useAuth()
+  const { user } = useAuth(); // AUTH CONTEXT
+  const { insertion, isSubmitted } = useCrud(); // CRUD CONTEXT
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState([])
-  const [isSubmitted, setIsSubmitted] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -22,144 +24,141 @@ const MyProfileComponent = () => {
 
   const saveProfile = async (e) => {
     e.preventDefault();
-    try {
-      await setDoc(doc(db, "users", user.uid), {
-        ...formData,
-        profileCompleted: true,
-        timeStamp: serverTimestamp()
-      })
-      setIsSubmitted(true);
-
-       // Update local data state after submission
-    const updatedData = { id: user.uid, ...formData };
-    setData([updatedData]);
-    } catch (error) {
-      console.log("Error in setting Document", error.message);
-    }
+    await insertion(formData)
   }
-
 
   useEffect(() => {
     const fetchData = async () => {
-      let list = [];
       try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-        querySnapshot.forEach((doc) => {
-          list.push({ id: doc.id, ...doc.data() })
-        });
-        setData(list)
+        if (user && user.uid) {
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setData(docSnap.data());
+          } else {
+            console.log('No such document!');
+          }
+        } else {
+          console.log('User or user ID is undefined.');
+        }
+        setLoading(false);
+
       } catch (error) {
-        console.log(error);
+        console.error('Error fetching user data:', error);
+        setLoading(false);
       }
     };
     fetchData();
-  }, [])
+  }, [user]); // Include 'user' object as a dependency
 
   console.log(data);
+  console.log(data.profileCompleted);
+  console.log(isSubmitted);
+
   return (
     <>
       <div>
-        <p>Welcome {user.uid}</p>
-        {data.length > 0 ? (
-          <>
-          <p>Welcome {data[0].name}</p>
-          <p>Welcome {data[0].id}</p>
-          </>
-        ) : (
-          <p>Loading data...</p>
-        )}
+        <p>Welcome {user?.uid}</p>
       </div>
-      {isSubmitted ? (
-        <p>Successfuly Submitted</p>
-      ) : (
-        <div className="flex justify-center items-center h-screen">
-          <div className="bg-white p-8 rounded-md shadow-md w-[44rem]">
-            <form onSubmit={saveProfile}>
-              <div className="mb-5 flex items-center">
-                <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Enter your name"
-                  className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800 ml-2"
-                />
-              </div>
-              <div className="mb-5 flex items-center">
-                <label htmlFor="age" className="block text-gray-700 font-semibold mb-2">
-                  Age
-                </label>
-                <input
-                  type="text"
-                  id="age"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleInputChange}
-                  placeholder="Enter your age"
-                  className="border border-gray-300 rounded-md w-16 py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800 ml-2"
-                />
-                <div className="-mb-2 ml-8 mt-5 flex items-center">
-                  <label htmlFor="gender" className="block w-9 text-gray-700 font-semibold mb-7 whitespace-nowrap">
-                    Select Gender
+      {data && data.profileCompleted === undefined ? (
+        <>
+          <div className="flex justify-center items-center h-screen">
+            <div className="bg-white p-8 rounded-md shadow-md w-[44rem]">
+              <form onSubmit={saveProfile}>
+                <div className="mb-5 flex items-center">
+                  <label htmlFor="name" className="block text-gray-700 font-semibold mb-2">
+                    Name
                   </label>
-                  <select
-                    id="gender"
-                    name="gender"
-                    value={formData.gender}
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
-                    className="-mt-7 block w-full border border-gray-300 rounded-md py-2 px-3 ml-20 focus:outline-none focus:border-blue-500"
+                    placeholder="Enter your name"
+                    className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800 ml-2"
+                  />
+                </div>
+                <div className="mb-5 flex items-center">
+                  <label htmlFor="age" className="block text-gray-700 font-semibold mb-2">
+                    Age
+                  </label>
+                  <input
+                    type="text"
+                    id="age"
+                    name="age"
+                    value={formData.age}
+                    onChange={handleInputChange}
+                    placeholder="Enter your age"
+                    className="border border-gray-300 rounded-md w-16 py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800 ml-2"
+                  />
+                  <div className="-mb-2 ml-8 mt-5 flex items-center">
+                    <label htmlFor="gender" className="block w-9 text-gray-700 font-semibold mb-7 whitespace-nowrap">
+                      Select Gender
+                    </label>
+                    <select
+                      id="gender"
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                      className="-mt-7 block w-full border border-gray-300 rounded-md py-2 px-3 ml-20 focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                  </div>
+
+                </div>
+
+                <div className='-mt-2'>
+                  <div className="mb-5">
+                    <label htmlFor="height" className="block text-gray-700 font-semibold mb-2">
+                      Height (cm)
+                    </label>
+                    <input
+                      type="text"
+                      id="height"
+                      name="height"
+                      value={formData.height}
+                      onChange={handleInputChange}
+                      placeholder="Enter your height"
+                      className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800"
+                    />
+                  </div>
+                  <div className="mb-5">
+                    <label htmlFor="weight" className="block text-gray-700 font-semibold mb-2">
+                      Weight (kg)
+                    </label>
+                    <input
+                      type="text"
+                      id="weight"
+                      name="weight"
+                      value={formData.weight}
+                      onChange={handleInputChange}
+                      placeholder="Enter your weight"
+                      className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   >
-                    <option value="">Select</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                  </select>
+                    Submit
+                  </button>
                 </div>
-
-              </div>
-
-              <div className='-mt-2'>
-                <div className="mb-5">
-                  <label htmlFor="height" className="block text-gray-700 font-semibold mb-2">
-                    Height (cm)
-                  </label>
-                  <input
-                    type="text"
-                    id="height"
-                    name="height"
-                    value={formData.height}
-                    onChange={handleInputChange}
-                    placeholder="Enter your height"
-                    className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800"
-                  />
-                </div>
-                <div className="mb-5">
-                  <label htmlFor="weight" className="block text-gray-700 font-semibold mb-2">
-                    Weight (kg)
-                  </label>
-                  <input
-                    type="text"
-                    id="weight"
-                    name="weight"
-                    value={formData.weight}
-                    onChange={handleInputChange}
-                    placeholder="Enter your weight"
-                    className="border border-gray-300 rounded-md w-full py-2 px-3 focus:outline-none focus:border-blue-500 text-gray-800"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
+        </>
+      ) : data && data.profileCompleted ? (
+        <>
+          <p>Successfully Submitted</p>
+          <p>Welcome {data.name}</p>
+          <p>Height {data.height} cm</p>
+        </>
+      ) : (
+        <p>Loading or no data found</p>
       )}
     </>
   )

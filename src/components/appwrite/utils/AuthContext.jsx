@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }) => {
             setUser(null)
             setisLoggedIn(false);
             console.log("logged out");
-            console.log(isLoggedIn);
         } catch (error) {
             console.log(error.message);
         }
@@ -55,8 +54,17 @@ export const AuthProvider = ({ children }) => {
             setisLoggedIn(false);
         }
      })
+
+     const checkUserStatus = () => {
+        if(user){
+            setisLoggedIn(true)
+        } else {
+            setisLoggedIn(false)
+        }
+     } 
      return () => {
         unsubscribe();
+        checkUserStatus();
      }
     }, [])
 

@@ -6,6 +6,7 @@ import TakeTestComponent from './components/TakeTestComponent';
 import MyStatisticsComponent from './components/MyStatisticsComponent';
 import MyProfileComponent from './components/MyProfileComponent';
 import { AuthProvider } from './components/appwrite/utils/AuthContext';
+import { CrudProvider } from './components/appwrite/utils/CdContext';
 import Signup from './components/Signup';
 import Login from './components/Login';
 import Home from './components/Home';
@@ -16,6 +17,7 @@ const App = () => {
   return (
     <Router>
       <AuthProvider>
+        <CrudProvider>
         <Layout>
           <Routes>
             <Route path="/login" element={<Login />} /> {/* Route for Login */}
@@ -28,6 +30,7 @@ const App = () => {
 
           </Routes>
         </Layout>
+        </CrudProvider>
       </AuthProvider>
     </Router>
   );
