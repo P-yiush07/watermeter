@@ -6,8 +6,7 @@ import { useCrud } from './appwrite/utils/CdContext';
 
 const MyProfileComponent = () => {
   const { user } = useAuth(); // AUTH CONTEXT
-  const { insertion, isSubmitted } = useCrud(); // CRUD CONTEXT
-  const [loading, setLoading] = useState(true);
+  const { insertion } = useCrud(); // CRUD CONTEXT
   const [data, setData] = useState([])
   const [formData, setFormData] = useState({
     name: '',
@@ -25,7 +24,25 @@ const MyProfileComponent = () => {
   const saveProfile = async (e) => {
     e.preventDefault();
     await insertion(formData)
+
+    // After inserting data, fetch the updated data and set it to the state
+  try {
+    if (user && user.uid) {
+      const docRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setData(docSnap.data());
+      } else {
+        console.log('No such document!');
+      }
+    } else {
+      console.log('User or user ID is undefined.');
+    }
+  } catch (error) {
+    console.error('Error fetching user data:', error);
   }
+};
+    
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,11 +58,9 @@ const MyProfileComponent = () => {
         } else {
           console.log('User or user ID is undefined.');
         }
-        setLoading(false);
 
       } catch (error) {
         console.error('Error fetching user data:', error);
-        setLoading(false);
       }
     };
     fetchData();
@@ -53,7 +68,7 @@ const MyProfileComponent = () => {
 
   console.log(data);
   console.log(data.profileCompleted);
-  console.log(isSubmitted);
+
 
   return (
     <>
