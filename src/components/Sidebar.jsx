@@ -25,6 +25,9 @@ const Sidebar = () => {
           <Link to="/take-test" className="block">Take Test</Link>
         </li>
         <li className="px-4 py-2 hover:bg-blue-600 cursor-pointer">
+          <Link to="/reminder" className="block">Reminder & Set Data</Link>
+        </li>
+        <li className="px-4 py-2 hover:bg-blue-600 cursor-pointer">
           <Link to="/my-statistics" className="block">My Statistics</Link>
         </li>
         <li className="px-4 py-2 hover:bg-blue-600 cursor-pointer">

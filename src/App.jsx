@@ -11,6 +11,7 @@ import Signup from './components/Signup';
 import Login from './components/Login';
 import Home from './components/Home';
 import ProtectedRoute from './components/appwrite/utils/ProtectedRoute';
+import ReminderComponent from './components/ReminderComponent';
 // import ProfilePage from './components/ProfilePage';
 
 const App = () => {
@@ -25,6 +26,7 @@ const App = () => {
             <Route path="/" element={<Home />} />
 
               <Route path="/take-test" element={<ProtectedRoute><TakeTestComponent /></ProtectedRoute>} />
+              <Route path="/reminder" element={<ProtectedRoute><ReminderComponent /></ProtectedRoute>} />
               <Route path="/my-statistics" element={<ProtectedRoute><MyStatisticsComponent /></ProtectedRoute>} />
               <Route path="/my-profile" element={<ProtectedRoute><MyProfileComponent /></ProtectedRoute>} />
 

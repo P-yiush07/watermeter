@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { addDoc, collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { db } from '../firebase';
 import { useAuth } from './AuthContext';
 
@@ -8,7 +8,7 @@ const CdContext = createContext();
 export const CrudProvider = ({ children }) => {
 
     const { user } = useAuth(); // AUTH CONTEXT
-    const [data, setData] = useState([]);
+    
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const insertion = async (formData) => {
@@ -24,12 +24,40 @@ export const CrudProvider = ({ children }) => {
         setIsSubmitted(true);
     }
 
+
+    const setIntake = async (dailyIntake) => {
+        const currentDate = new Date().toLocaleDateString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric',
+          });
+          
+          const currentTime = new Date().toLocaleTimeString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false,
+          });
+          
+          const formattedDateTime = `${currentDate.replace(/\//g, '-')} ${currentTime}`;
+          
+        try {
+            const intakeRef = doc(db, `users_intake/${user.uid}/intakes`, formattedDateTime);
+            await setDoc(intakeRef, {
+                dailyIntake,
+                timeStamp: serverTimestamp()
+              });
+        } catch (error) {
+            console.log('Error in setting Intake', error.message);
+        }
+    }
+
     const contextData = {
         insertion,
-        data,
-        setData,
         isSubmitted,
         setIsSubmitted,
+        setIntake,
     }
 
     return (
