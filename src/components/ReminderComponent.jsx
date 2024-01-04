@@ -35,7 +35,7 @@ const ReminderComponent = () => {
                     <input
                         id="dailyIntake"
                         className="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        type="text"
+                        type="number"
                         placeholder="Enter your daily intake"
                         value={dailyIntake}
                         onChange={handleInputChange}

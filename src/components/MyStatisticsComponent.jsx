@@ -10,6 +10,7 @@ const MyStatisticsComponent = () => {
   const [filteredIntakes, setFilteredIntakes] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedButton, setSelectedButton] = useState('');
+  const [todayIntake, setTodayIntake] = useState('0')
 
   useEffect(() => {
     const fetch = async () => {
@@ -31,7 +32,6 @@ const MyStatisticsComponent = () => {
         console.log(error.message);
       }
     };
-
     fetch();
   }, [user.uid])
 
@@ -63,11 +63,49 @@ const MyStatisticsComponent = () => {
     setSelectedDate(null);
     filterIntakesByDate(twoDaysAgo);
   };
+  
+  let todayTotalIntake = 0; // Declare outside the function to make it accessible
 
+  const calculateTodayTotalIntake = (intakes) => {
+    const today = new Date(); // Get today's date
+    const todayIntakes = intakes.filter(
+      (intake) => {
+        const intakeDate = new Date(intake.timeStamp);
+        return intakeDate.toDateString() === today.toDateString();
+      }
+    );
+  
+    todayTotalIntake = todayIntakes.reduce(
+      (total, intake) => total + parseInt(intake.dailyIntake),
+      0
+    );
+  };
+
+  useEffect(() => {
+    // Here you can call calculateTodayTotalIntake to compute today's total intake
+    // This code will run when the component mounts or whenever dailyIntakes changes
+    calculateTodayTotalIntake(dailyIntakes);
+    // You can also set it to state if needed
+    setTodayIntake(todayTotalIntake);
+  }, [dailyIntakes]);
+  
   const handleTodayClick = () => {
     setSelectedButton('today');
     setSelectedDate(null);
-    filterIntakesByDate(new Date());
+    
+    const today = new Date();
+    const todayIntakes = dailyIntakes.filter(
+      (intake) => new Date(intake.timeStamp).toDateString() === today.toDateString()
+    );
+  
+    setFilteredIntakes(todayIntakes);
+  
+    calculateTodayTotalIntake(todayIntakes); // Calculate today's total intake
+  
+    setTodayIntake(todayTotalIntake);
+  
+    console.log("Today's total intake:", todayTotalIntake);
+    // Do whatever you want with today's total intake value
   };
 
   const handleYesterdayClick = () => {
@@ -78,12 +116,16 @@ const MyStatisticsComponent = () => {
     filterIntakesByDate(yesterday);
   };
 
-  let displayContent;
+  let displayContent = (
+    <>
+    <h3 className="font-semibold">Your Today's Total Intake is <span className="font-bold text-orange-500">{todayIntake}L</span></h3>
+    </>
+  );
 
   if (selectedButton === 'today') {
     displayContent = (
       <>
-        <h3 className="font-semibold">Today's Intake :</h3>
+        <h3 className="font-semibold">Today's Intake : <span className="font-bold text-orange-500">{todayIntake}L</span></h3>
       </>
     )
   } else if (selectedButton === 'yesterday') {
@@ -102,6 +144,15 @@ const MyStatisticsComponent = () => {
           <input type="date" value={selectedDate ? selectedDate.toISOString().slice(0, 10) : ""} onChange={handleDateChange} />
           <button className="ml-6" onClick={resetFilters}>Reset</button>
         </div>
+        <div className="mt-10 flex justify-center mb-8">
+          <hr />
+          <div className="flex justify-between items-center mt-4 w-[50%]">
+            <button onClick={() => { handleBeforeClick(); setSelectedButton('before'); }} className={`px-4 py-2 rounded-md ${selectedButton === 'before' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}>Before</button>
+            <button onClick={() => { handleTodayClick(); setSelectedButton('today'); }} className={`px-4 py-2 rounded-md ${selectedButton === 'today' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}>Today</button>
+            <button onClick={() => { handleYesterdayClick(); setSelectedButton('yesterday'); }} className={`px-4 py-2 rounded-md ${selectedButton === 'yesterday' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}>Yesterday</button>
+          </div>
+          <hr />
+        </div>
         {filteredIntakes.length > 0 ? (
           <table style={{ borderCollapse: "collapse", width: "80%", margin: "auto" }}>
             <thead>
@@ -114,7 +165,7 @@ const MyStatisticsComponent = () => {
               {filteredIntakes.map((intake, index) => (
                 <tr key={index}>
                   <td style={{ textAlign: "center" }}>{intake.timeStamp.toLocaleString()}</td>
-                  <td style={{ textAlign: "center" }}>{intake.dailyIntake}</td>
+                  <td style={{ textAlign: "center" }}>{intake.dailyIntake}L</td>
                 </tr>
               ))}
             </tbody>
@@ -124,16 +175,7 @@ const MyStatisticsComponent = () => {
             <p>No daily intake data available</p>
           </div>
         )}
-        <div className="mt-10 flex justify-center">
-          <hr />
-          <div className="flex justify-between items-center mt-4 w-[50%]">
-            <button onClick={() => { handleBeforeClick(); setSelectedButton('before'); }} className={`px-4 py-2 rounded-md ${selectedButton === 'before' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}>Before</button>
-            <button onClick={() => { handleTodayClick(); setSelectedButton('today'); }} className={`px-4 py-2 rounded-md ${selectedButton === 'today' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}>Today</button>
-            <button onClick={() => { handleYesterdayClick(); setSelectedButton('yesterday'); }} className={`px-4 py-2 rounded-md ${selectedButton === 'yesterday' ? 'bg-orange-500 text-white' : 'bg-white text-black'}`}>Yesterday</button>
-          </div>
-          <hr />
-        </div>
-        <div className="mt-20">
+        <div className="mt-14">
           {displayContent}
         </div>
       </div>
