@@ -20,7 +20,7 @@ const Layout = ({ children }) => {
         {!hideSidebar && location.pathname !== '/' && <Sidebar />} {/* Ensure Sidebar doesn't appear on Home */}
 
         {/* Display main content */}
-        <div className={`${location.pathname === '/' ? 'w-full' : 'flex-1'} p-1`}>
+        <div className={`${location.pathname === '/' ? 'w-full' : 'flex-1 overflow-auto'} p-1`}>
           {children}
         </div>
       </div>
