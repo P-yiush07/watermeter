@@ -8,6 +8,7 @@ const MyProfileComponent = () => {
   const { user } = useAuth(); // AUTH CONTEXT
   const { insertion } = useCrud(); // CRUD CONTEXT
   const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -58,7 +59,7 @@ const MyProfileComponent = () => {
         } else {
           console.log('User or user ID is undefined.');
         }
-
+      setLoading(false);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -69,6 +70,9 @@ const MyProfileComponent = () => {
   console.log(data);
   console.log(data.profileCompleted);
 
+  if (loading) {
+    return <p>Loading...</p>; // Display loading state until data is fetched
+  }
 
   return (
     <>
