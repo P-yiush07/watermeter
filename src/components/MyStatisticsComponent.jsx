@@ -9,8 +9,10 @@ const MyStatisticsComponent = () => {
   const [dailyIntakes, setDailyIntakes] = useState([]);
   const [filteredIntakes, setFilteredIntakes] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedButton, setSelectedButton] = useState('');
+  const [selectedButton, setSelectedButton] = useState('today');
   const [todayIntake, setTodayIntake] = useState('0')
+  const [yesterdayIntake, setYesterdayIntake] = useState('0')
+  const [selectedSortOption, setSelectedSortOption] = useState("");
 
   useEffect(() => {
     const fetch = async () => {
@@ -26,8 +28,14 @@ const MyStatisticsComponent = () => {
             intakesData.push({ dailyIntake, timeStamp });
           }
         });
+
+        const today = new Date();
+        const todayIntakes = dailyIntakes.filter(
+          (intake) => new Date(intake.timeStamp).toDateString() === today.toDateString()
+        );
+
         setDailyIntakes(intakesData);
-        setFilteredIntakes(intakesData);
+        setFilteredIntakes(todayIntakes);
       } catch (error) {
         console.log(error.message);
       }
@@ -48,10 +56,13 @@ const MyStatisticsComponent = () => {
     setSelectedDate(newDate);
     setSelectedButton('');
     filterIntakesByDate(newDate || new Date()); // Show all data if date is null, otherwise apply filter
+
+    setSelectedSortOption("");
   };;
 
   const resetFilters = () => {
     setSelectedDate(null); // Reset date to null
+    setSelectedButton('');
     setSelectedButton('');
     setFilteredIntakes(dailyIntakes); // Reset to show all data
   };
@@ -63,7 +74,7 @@ const MyStatisticsComponent = () => {
     setSelectedDate(null);
     filterIntakesByDate(twoDaysAgo);
   };
-  
+
   let todayTotalIntake = 0; // Declare outside the function to make it accessible
 
   const calculateTodayTotalIntake = (intakes) => {
@@ -74,7 +85,7 @@ const MyStatisticsComponent = () => {
         return intakeDate.toDateString() === today.toDateString();
       }
     );
-  
+
     todayTotalIntake = todayIntakes.reduce(
       (total, intake) => total + parseInt(intake.dailyIntake),
       0
@@ -82,28 +93,31 @@ const MyStatisticsComponent = () => {
   };
 
   useEffect(() => {
-    // Here you can call calculateTodayTotalIntake to compute today's total intake
-    // This code will run when the component mounts or whenever dailyIntakes changes
-    calculateTodayTotalIntake(dailyIntakes);
-    // You can also set it to state if needed
-    setTodayIntake(todayTotalIntake);
-  }, [dailyIntakes]);
-  
-  const handleTodayClick = () => {
-    setSelectedButton('today');
-    setSelectedDate(null);
-    
     const today = new Date();
     const todayIntakes = dailyIntakes.filter(
       (intake) => new Date(intake.timeStamp).toDateString() === today.toDateString()
     );
-  
+
     setFilteredIntakes(todayIntakes);
-  
-    calculateTodayTotalIntake(todayIntakes); // Calculate today's total intake
-  
+    calculateTodayTotalIntake(dailyIntakes);
     setTodayIntake(todayTotalIntake);
-  
+  }, [dailyIntakes]);
+
+  const handleTodayClick = () => {
+    setSelectedButton('today');
+    setSelectedDate(null);
+
+    const today = new Date();
+    const todayIntakes = dailyIntakes.filter(
+      (intake) => new Date(intake.timeStamp).toDateString() === today.toDateString()
+    );
+
+    setFilteredIntakes(todayIntakes);
+
+    calculateTodayTotalIntake(todayIntakes); // Calculate today's total intake
+
+    setTodayIntake(todayTotalIntake);
+
     console.log("Today's total intake:", todayTotalIntake);
     // Do whatever you want with today's total intake value
   };
@@ -113,12 +127,27 @@ const MyStatisticsComponent = () => {
     yesterday.setDate(yesterday.getDate() - 1);
     setSelectedButton('yesterday');
     setSelectedDate(null);
-    filterIntakesByDate(yesterday);
+
+    const yesterdayIntakes = dailyIntakes.filter(
+      (intake) => new Date(intake.timeStamp).toDateString() === yesterday.toDateString()
+    );
+
+    const yesterdayTotalIntake = yesterdayIntakes.reduce(
+      (total, intake) => total + parseInt(intake.dailyIntake),
+      0
+    );
+
+    setYesterdayIntake(yesterdayTotalIntake);
+    setFilteredIntakes(yesterdayIntakes);
+
+    console.log("Yesterday's total intake:", yesterdayTotalIntake);
+
+
   };
 
   let displayContent = (
     <>
-    <h3 className="font-semibold">Your Today's Total Intake is <span className="font-bold text-orange-500">{todayIntake}L</span></h3>
+      <h3 className="font-semibold">Your Today's Total Intake is <span className="font-bold text-orange-500">{todayIntake}L</span></h3>
     </>
   );
 
@@ -131,9 +160,43 @@ const MyStatisticsComponent = () => {
   } else if (selectedButton === 'yesterday') {
     displayContent = (
       <>
-      <h3 className="font-semibold">Yesterday's Total Intake :</h3>
+        <h3 className="font-semibold">Yesterday's Total Intake was <span className="font-bold text-orange-500">{yesterdayIntake}L</span></h3>
       </>
     )
+  }
+
+  const handleSelectChange = (e) => {
+    const selectedOption = e.target.value;
+    setSelectedSortOption(selectedOption);
+
+    switch (selectedOption) {
+      case 'ascendingTimestamp':
+        const sortedByAscendingTimestamp = [...filteredIntakes].sort((a, b) =>
+          a.timeStamp - b.timeStamp
+        );
+        setFilteredIntakes(sortedByAscendingTimestamp);
+        break;
+      case 'descendingTimestamp':
+        const sortedByDescendingTimestamp = [...filteredIntakes].sort((a, b) =>
+          b.timeStamp - a.timeStamp
+        );
+        setFilteredIntakes(sortedByDescendingTimestamp);
+        break;
+      case 'ascendingIntake':
+        const sortedByAscendingIntake = [...filteredIntakes].sort((a, b) =>
+          parseInt(a.dailyIntake) - parseInt(b.dailyIntake)
+        );
+        setFilteredIntakes(sortedByAscendingIntake);
+        break;
+      case 'descendingIntake':
+        const sortedByDescendingIntake = [...filteredIntakes].sort((a, b) =>
+          parseInt(b.dailyIntake) - parseInt(a.dailyIntake)
+        );
+        setFilteredIntakes(sortedByDescendingIntake);
+        break;
+      default:
+        break;
+    }
   }
 
   return (
@@ -143,6 +206,13 @@ const MyStatisticsComponent = () => {
         <div>
           <input type="date" value={selectedDate ? selectedDate.toISOString().slice(0, 10) : ""} onChange={handleDateChange} />
           <button className="ml-6" onClick={resetFilters}>Reset</button>
+          <select value={selectedSortOption} onChange={handleSelectChange} className="ml-4">
+            <option value="">Select an option</option>
+            <option value="ascendingTimestamp">Sort Ascending by Timestamp</option>
+            <option value="descendingTimestamp">Sort Descending by Timestamp</option>
+            <option value="ascendingIntake">Sort Ascending by Intake</option>
+            <option value="descendingIntake">Sort Descending by Intake</option>
+          </select>
         </div>
         <div className="mt-10 flex justify-center mb-8">
           <hr />
@@ -172,7 +242,7 @@ const MyStatisticsComponent = () => {
           </table>
         ) : (
           <div className="mt-4">
-            <p>No daily intake data available</p>
+            <p>No intake data available</p>
           </div>
         )}
         <div className="mt-14">
