@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { collection, getDocs } from "firebase/firestore";
 import { db } from './appwrite/firebase';
 import { useAuth } from './appwrite/utils/AuthContext';
+import MyChartComponent from "./MyChartComponent";
 
 const MyStatisticsComponent = () => {
 
@@ -13,6 +14,7 @@ const MyStatisticsComponent = () => {
   const [todayIntake, setTodayIntake] = useState('0')
   const [yesterdayIntake, setYesterdayIntake] = useState('0')
   const [selectedSortOption, setSelectedSortOption] = useState("");
+  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -56,7 +58,7 @@ const MyStatisticsComponent = () => {
     setSelectedDate(newDate);
     setSelectedButton('');
     filterIntakesByDate(newDate || new Date()); // Show all data if date is null, otherwise apply filter
-
+    setShowChart(true);
     setSelectedSortOption("");
   };;
 
@@ -65,6 +67,7 @@ const MyStatisticsComponent = () => {
     setSelectedButton('');
     setSelectedSortOption('');
     setFilteredIntakes(dailyIntakes); // Reset to show all data
+    setShowChart(false);
   };
 
   const handleBeforeClick = () => {
@@ -74,6 +77,7 @@ const MyStatisticsComponent = () => {
     setSelectedDate(null);
     filterIntakesByDate(twoDaysAgo);
     setSelectedSortOption('');
+    setShowChart(true);
   };
 
   let todayTotalIntake = 0; // Declare outside the function to make it accessible
@@ -102,12 +106,14 @@ const MyStatisticsComponent = () => {
     setFilteredIntakes(todayIntakes);
     calculateTodayTotalIntake(dailyIntakes);
     setTodayIntake(todayTotalIntake);
+    setShowChart(true);
   }, [dailyIntakes]);
 
   const handleTodayClick = () => {
     setSelectedButton('today');
     setSelectedDate(null);
     setSelectedSortOption('');
+    setShowChart(true);
 
     const today = new Date();
     const todayIntakes = dailyIntakes.filter(
@@ -130,6 +136,7 @@ const MyStatisticsComponent = () => {
     setSelectedButton('yesterday');
     setSelectedDate(null);
     setSelectedSortOption('');
+    setShowChart(true);
 
     const yesterdayIntakes = dailyIntakes.filter(
       (intake) => new Date(intake.timeStamp).toDateString() === yesterday.toDateString()
@@ -252,6 +259,9 @@ const MyStatisticsComponent = () => {
           {displayContent}
         </div>
       </div>
+      {showChart && filteredIntakes.length > 0 && (
+        <MyChartComponent intakeData={filteredIntakes} interval={2} />
+      )}
     </div>
   );
 };
