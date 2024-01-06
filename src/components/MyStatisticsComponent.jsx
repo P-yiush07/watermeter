@@ -63,7 +63,7 @@ const MyStatisticsComponent = () => {
   const resetFilters = () => {
     setSelectedDate(null); // Reset date to null
     setSelectedButton('');
-    setSelectedButton('');
+    setSelectedSortOption('');
     setFilteredIntakes(dailyIntakes); // Reset to show all data
   };
 
@@ -73,6 +73,7 @@ const MyStatisticsComponent = () => {
     setSelectedButton('before');
     setSelectedDate(null);
     filterIntakesByDate(twoDaysAgo);
+    setSelectedSortOption('');
   };
 
   let todayTotalIntake = 0; // Declare outside the function to make it accessible
@@ -106,6 +107,7 @@ const MyStatisticsComponent = () => {
   const handleTodayClick = () => {
     setSelectedButton('today');
     setSelectedDate(null);
+    setSelectedSortOption('');
 
     const today = new Date();
     const todayIntakes = dailyIntakes.filter(
@@ -127,6 +129,7 @@ const MyStatisticsComponent = () => {
     yesterday.setDate(yesterday.getDate() - 1);
     setSelectedButton('yesterday');
     setSelectedDate(null);
+    setSelectedSortOption('');
 
     const yesterdayIntakes = dailyIntakes.filter(
       (intake) => new Date(intake.timeStamp).toDateString() === yesterday.toDateString()
