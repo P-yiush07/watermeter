@@ -12,6 +12,7 @@ export const CrudProvider = ({ children }) => {
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const insertion = async (formData) => {
+
         try {
             await setDoc(doc(db, "users", user.uid), {
                 ...formData,
@@ -26,6 +27,7 @@ export const CrudProvider = ({ children }) => {
 
 
     const setIntake = async (dailyIntake) => {
+        
         const currentDate = new Date().toLocaleDateString('en-IN', {
             timeZone: 'Asia/Kolkata',
             day: 'numeric',
@@ -52,7 +54,7 @@ export const CrudProvider = ({ children }) => {
             console.log('Error in setting Intake', error.message);
         }
     }
-
+    
     const contextData = {
         insertion,
         isSubmitted,

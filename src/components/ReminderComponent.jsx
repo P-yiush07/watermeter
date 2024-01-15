@@ -1,5 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useCrud } from './appwrite/utils/CdContext';
+import { messaging1 } from './appwrite/firebase';
+import { getToken } from "firebase/messaging";
+
 
 const ReminderComponent = () => {
     
@@ -22,6 +25,21 @@ const ReminderComponent = () => {
         setIntake(dailyIntake);
         console.log('Entered String =>', dailyIntake);
     }
+
+    useEffect(() => {
+        async function requestPermission() {
+            const permission = await Notification.requestPermission()
+              if (permission === 'granted') {
+                console.log('Notification permission granted.')
+                const token = await getToken(messaging1, { vapidKey: 'BLoUHLMeFpj6WgIX8v4HTfgBdrhFWULe1cg7yEkeA6tSrsoUtIv14E_EHeX1q-0HYOwzi-Aj-vma7bemn8w5pxI'})
+                console.log(token);
+
+
+              }
+            }
+        requestPermission()
+    }, [])
+    
 
 
     return (
@@ -60,6 +78,7 @@ const ReminderComponent = () => {
                         </div>
                     </div>
                 )}
+            <h1>test</h1>
             </div>
         </>
     )
